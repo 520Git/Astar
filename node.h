@@ -39,8 +39,8 @@ public:
 class compareNode {
 private:
 public:
-	bool operator()(map_node& n1, map_node& n2){
-		if(n1.fScore  > n2.fScore) return true;
+	bool operator()(map_node* n1, map_node* n2){
+		if(n1->fScore  > n2->fScore) return true;
 		else return false;
 	}
 };
