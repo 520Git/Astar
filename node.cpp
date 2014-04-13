@@ -24,6 +24,7 @@ void map_node::init(int x, int y, bool z){
 //Function to initialize the pointers to neighbors so I can traverse the nodes like a graph
 //Rather than rely on the simple case of a 2d array
 void map_node::initNeighbors(int rows, int cols, map_node* map){
+	if(NUMNEIGHBS==4){
 	//Give all nodes four neighbors, nodes on edges have null pointer neighbors
 	if((yPos-1)==-1)neighbors[0]=0;
 	else neighbors[0]=&map[xyc(xPos,(yPos-1))];    //above
@@ -34,18 +35,33 @@ void map_node::initNeighbors(int rows, int cols, map_node* map){
 	if((xPos-1)==-1)neighbors[3]=0;
 	else neighbors[3]=&map[xyc((xPos-1),yPos)];         //left
 	return ;
+	}else if(NUMNEIGHBS==8){
+		int dx[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+		int dy[8] = { -1, -1, 0, 1, 1, 1, 0, -1 };
+		for(uint i=0; i<NUMNEIGHBS; i++){
+			if((yPos+dy[i]==-1)||(yPos+dy[i]==rows)||(xPos+dx[i]==-1)||(xPos+dx[i]==cols)) neighbors[i]=0;
+			else neighbors[i]=&map[xyc((xPos+dx[i]),(yPos+dy[i]))];
+		}
+	}else cout<< "error! number of neighbors is not 4 or 8" << endl;
 };
 
 //Heuristic that reutns difference in coordinates. This assumes you can't move diagonally
 //and that the cost to move between adjacent neighbors is always 1. (i.e. the map is not weighted)
-int map_node::xyDiffHeur(map_node* pGoal){
-	int dist = abs(xPos-pGoal->xPos)+ abs(yPos-pGoal->yPos);
+float map_node::xyDiffHeur(map_node* pGoal){
+	float dist;
+	if(NUMNEIGHBS==4){
+	dist = abs(xPos-pGoal->xPos)+ abs(yPos-pGoal->yPos);
+	} else if(NUMNEIGHBS==8){
+	dist = sqrt((((xPos-pGoal->xPos)^2)+((yPos-pGoal->yPos)^2))/2); //This assumes diagonals have edge weight 1, so you have to correct straight line distance to be addmisible
+	}else{
+		cout<< "error! number of neighbors is not 4 or 8" << endl;
+	}
 	return dist;
 };
 
 
 //Fscore is based on the nodes gscore and its estimated distance to the goal
-void map_node::calculateFScore(map_node goal, int (*Hueristic)(map_node)){
+void map_node::calculateFScore(map_node goal, float (*Hueristic)(map_node)){
 	fScore = gScore + Hueristic(goal);
 	return;
 };
@@ -70,7 +86,7 @@ map_node* initMap(int rows, int cols){
 
 //Add randomly obstructed nodes to the world.
 void randomizeTerrain(int rows, int cols, map_node* map, float pObs){
-	int numObs=ceil(rows*cols*pObs+.5); //The total number of obstructed spaces
+	int numObs=ceil(rows*cols*pObs-.5); //The total number of obstructed spaces
 	while(numObs>0){
 		int rx= rand()%(cols);
 		int ry= rand()%(rows);
@@ -124,7 +140,7 @@ void debugNeighbors(map_node* map){
 			for(int x=0;x<NUMCOLS;x++){
 				//Print out current node
 				cout<< '(' << x << ',' << y << "):" << '[' << map[xyc(x,y)].xPos << ',' << map[xyc(x,y)].yPos << ']' << "with address: "<< &map[xyc(x,y)] << endl;
-				for(int q=0; q<4; q++){
+				for(uint q=0; q<(sizeof(map[xyc(x,y)].neighbors)/sizeof(map[xyc(x,y)].neighbors[1])); q++){
 					//Print null if there is no neighbor in a certain position
 					if(map[xyc(x,y)].neighbors[q]==0){
 						cout<< "   Has Neighbors #" << q << ": NULL" << endl;

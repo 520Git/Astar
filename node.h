@@ -8,8 +8,9 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#define NUMROWS 53
-#define NUMCOLS 130 //Make sure to change the companion #define in the next file
+#define NUMROWS 40
+#define NUMCOLS 40 //Make sure to change the companion #define in the next file
+#define NUMNEIGHBS 4
 
 #define ijc(i,j) (i*NUMCOLS+j)
 #define xyc(x,y) (y*NUMCOLS+x)
@@ -20,7 +21,8 @@ using namespace std;
 class map_node {
 private:
 public:
-	int xPos, yPos,gScore,fScore;
+	int xPos, yPos;
+	float gScore,fScore;
 	char state;
 	// O = obstructed
 	// S = start
@@ -28,13 +30,12 @@ public:
 	//" "= unobstructed;
 	bool isClosed=0;
 	bool isOpen=0;
-	map_node* neighbors[4];
+	map_node* neighbors[NUMNEIGHBS];
 	map_node* cameFrom;
 	void init(int xPos, int yPos, bool isClosed);
-	void calculateGScore(map_node start); //Not yet implemented
-	void calculateFScore(map_node goal, int (*Hueristic)(map_node)); //Not yet implemented
+	void calculateFScore(map_node goal, float (*Hueristic)(map_node)); //Not yet implemented
 	void initNeighbors(int rows, int cols, map_node* map);
-	int xyDiffHeur(map_node* pGoal);
+	float xyDiffHeur(map_node* pGoal);
 };
 
 //Class that defines the > operator for map_node so that priority_queue can sort them

@@ -17,7 +17,8 @@ openQueue open_nodes;
 
 int main() {
 	//Make a random seed so that obstruction generation is different every time.
-	srand(time(0));
+	int seed = time(0);
+	srand(seed);
 	//Initialize Map
 	map = initMap(NUMROWS,NUMCOLS);
 	//Make pointer to goal and set state appropriately
@@ -31,7 +32,7 @@ int main() {
 	pStart->isOpen =1;
 	open_nodes.push(pStart); //Only the start node is in the open_nodes queue at the start
 	//Add random obstructions in empty spaces
-	randomizeTerrain(NUMROWS, NUMCOLS, map, .333);
+	randomizeTerrain(NUMROWS, NUMCOLS, map, 0);
 	map_node* current;
 	int tent_gScore;
 	while(!open_nodes.empty()){
@@ -55,7 +56,7 @@ int main() {
 				cout << endl;
 				//wait();
 			}
-			cout << "shortest path found!" << endl;
+			cout << "shortest path found! This map generated with seed: " << seed << endl;
 			return 1;
 		}
 		//Iterate through all neighbors
@@ -80,7 +81,7 @@ int main() {
 		}
 	}
 	//If the program exits the while loop, there was no path to the goal
-	cout << "Failure!: There is no path to the exit" << endl;
+	cout << "Failure!: There is no path to the exit. This map generated with seed: " << seed << endl;
 	return 0;
 }
 
