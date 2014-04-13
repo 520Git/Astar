@@ -7,7 +7,9 @@
 #include "node.h"
 #include <cstring>
 #include <iostream>
-#include <limits>
+#include <limits> //Included for debug function wait
+#include <math.h>
+#include <stdlib.h> //for rand
 using namespace std;
 
 
@@ -46,10 +48,49 @@ map_node* initMap(int rows, int cols){
 			map[i*cols+j].gScore = 0;
 			map[i*cols+j].fScore = 999999999;
 			map[i*cols+j].initNeighbors(rows, cols, map);
+			map[i*cols+j].state = ' ';
 		}
 	}
 	return map;
 }
+
+
+void randomizeTerrain(int rows, int cols, map_node* map, float pObs){
+	int numObs=ceil(rows*cols*pObs+.5); //The total number of obstructed spaces
+	while(numObs>0){
+		int rx= rand()%(cols);
+		int ry= rand()%(rows);
+		//If the space is currently empty, make it obstructed and decrement the loop variable
+		if(map[xyc(rx,ry)].state == ' ') {
+			map[xyc(rx,ry)].state = 'O';
+			numObs--;
+		}
+	}
+	return;
+}
+
+void printMap(int rows, int cols, map_node* map){
+	for(int i=0; i<rows; i++){
+			for(int j=0; j<cols; j++){
+				switch (map[ijc(i,j)].state){
+				case 'O':
+					cout << "\u2588";
+					break;
+				case 'S':
+					cout << 'S';
+					break;
+				case 'G':
+					cout << 'G';
+					break;
+				default:
+					cout << ' ';
+					break;
+				}
+			}
+			cout << endl;
+	}
+}
+
 
 //Function I sometimes use in debugging to prompt user and wait for enter key to be pressed
 void wait()

@@ -8,8 +8,8 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#define NUMROWS 40
-#define NUMCOLS 500 //Make sure to change the companion #define in the next file
+#define NUMROWS 16
+#define NUMCOLS 140 //Make sure to change the companion #define in the next file
 
 #define ijc(i,j) (i*NUMCOLS+j)
 #define xyc(x,y) (y*NUMCOLS+x)
@@ -20,7 +20,11 @@ class map_node {
 
 public:
 	int xPos, yPos,gScore,fScore;
-	bool isObstructed;
+	char state;
+	// O = obstructed
+	// S = start
+	// G = goal
+	//" "= unobstructed;
 	bool isClosed=0;
 	map_node* neighbors[4];
 	void init(int xPos, int yPos, bool isClosed);
@@ -30,6 +34,8 @@ public:
 };
 
 map_node* initMap(int rows, int cols);
+void randomizeTerrain(int rows, int cols, map_node* map, float pObs);
 void debugNeighbors(map_node* map);
+void printMap(int rows, int cols, map_node* map);
 
 #endif /* NODE_H_ */
