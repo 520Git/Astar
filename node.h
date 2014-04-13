@@ -8,13 +8,14 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#define NUMROWS 5
-#define NUMCOLS 5 //Make sure to change the companion #define in the next file
+#define NUMROWS 53
+#define NUMCOLS 130 //Make sure to change the companion #define in the next file
 
 #define ijc(i,j) (i*NUMCOLS+j)
 #define xyc(x,y) (y*NUMCOLS+x)
 
-int add(int x, int y);
+#include <queue>
+using namespace std;
 
 class map_node {
 private:
@@ -28,6 +29,7 @@ public:
 	bool isClosed=0;
 	bool isOpen=0;
 	map_node* neighbors[4];
+	map_node* cameFrom;
 	void init(int xPos, int yPos, bool isClosed);
 	void calculateGScore(map_node start); //Not yet implemented
 	void calculateFScore(map_node goal, int (*Hueristic)(map_node)); //Not yet implemented
@@ -47,10 +49,13 @@ public:
 	}
 };
 
+typedef std::priority_queue<map_node*,vector<map_node*>,compareNode> openQueue;
+
 map_node* initMap(int rows, int cols);
 void randomizeTerrain(int rows, int cols, map_node* map, float pObs);
 void debugNeighbors(map_node* map);
 void printMap(int rows, int cols, map_node* map);
 void wait();
+void forceResort(openQueue open_nodes);
 
 #endif /* NODE_H_ */

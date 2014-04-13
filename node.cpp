@@ -96,6 +96,9 @@ void printMap(int rows, int cols, map_node* map){
 				case 'G':
 					cout << 'G';
 					break;
+				case 'P':
+					cout << "\u2591";
+					break;
 				default:
 					if(map[ijc(i,j)].isClosed) cout << 'C';
 					else if ((map[ijc(i,j)].isOpen)) cout <<'O';
@@ -134,5 +137,16 @@ void debugNeighbors(map_node* map){
 			}
 		}
 }
+
+void forceResort(openQueue open_nodes){
+	//This forces the queue to resort which may be necessary if the fScore of something already in the open queue changes
+	if(!open_nodes.empty()){
+	map_node* temp = open_nodes.top();
+	open_nodes.pop();
+	open_nodes.push(temp);
+	}
+	return;
+}
+
 
 
