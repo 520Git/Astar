@@ -36,6 +36,20 @@ void map_node::initNeighbors(int rows, int cols, map_node* map){
 	return ;
 };
 
+//Heuristic that reutns difference in coordinates. This assumes you can't move diagonally
+//and that the cost to move between adjacent neighbors is always 1. (i.e. the map is not weighted)
+int map_node::xyDiffHeur(map_node* pGoal){
+	int dist = abs(xPos-pGoal->xPos)+ abs(yPos-pGoal->yPos);
+	return dist;
+};
+
+
+//Fscore is based on the nodes gscore and its estimated distance to the goal
+void map_node::calculateFScore(map_node goal, int (*Hueristic)(map_node)){
+	fScore = gScore + Hueristic(goal);
+	return;
+};
+
 
 //Function to set initial values of all nodes in the map
 map_node* initMap(int rows, int cols){
@@ -83,7 +97,9 @@ void printMap(int rows, int cols, map_node* map){
 					cout << 'G';
 					break;
 				default:
-					cout << ' ';
+					if(map[ijc(i,j)].isClosed) cout << 'C';
+					else if ((map[ijc(i,j)].isOpen)) cout <<'O';
+					else cout << ' ';
 					break;
 				}
 			}

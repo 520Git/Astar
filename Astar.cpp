@@ -17,60 +17,61 @@ std::priority_queue<map_node*,vector<map_node*>,compareNode> open_nodes;
 	//they are alternate paths that will be explored lowest f score first
 
 int main() {
-
-	//Testing priority queue.
-
-
-	map_node greatest;
-	greatest.fScore = 1000;
-	open_nodes.push(&greatest);
-	cout << open_nodes.top()->fScore << endl;
-	greatest.fScore = 999;
-	cout << open_nodes.top()->fScore << endl;
-	map_node mid;
-	mid.fScore = 730;
-	open_nodes.push(&mid);
-	cout << open_nodes.top()->fScore << endl;
-	map_node least;
-	least.fScore = 50;
-	open_nodes.push(&least);
-	cout << open_nodes.top()->fScore << endl;
-
-	//Test if the nodes re-order if I change one of the values
-	least.fScore=5000;
-	greatest.fScore=600;
-	cout << open_nodes.top()->fScore << endl;
-	cout << open_nodes.size() << endl;
-	open_nodes.pop();
-	cout << open_nodes.size() << endl;
-	cout << open_nodes.top()->fScore << endl;
-	return 0;
-
-
-
-
 	//Make a random seed so that obstruction generation is different every time.
 	srand(time(0));
 	//Initialize Map
 	map = initMap(NUMROWS,NUMCOLS);
-	//Make pointers to start and goal, and set their states appropriately;
-	map_node* pStart = &map[xyc(0,0)];
-	(*pStart).state = 'S';
-	//open_nodes.pop()
+	//Make pointer to goal and set state appropriately
 	map_node* pGoal = &map[xyc((NUMCOLS-1),(NUMROWS-1))];
 	(*pGoal).state = 'G';
+	//Make pointer to start, initialize state and scores appropriately, add to open_nodes queue
+	map_node* pStart = &map[xyc(0,0)];
+	(*pStart).state = 'S';
+	pStart->gScore =0;
+	pStart->fScore = pStart->gScore + pStart->xyDiffHeur(pGoal);
+	pStart->isOpen =1;
+	open_nodes.push(pStart); //Only the start node is in the open_nodes queue at the start
 	//Add random obstructions in empty spaces
-	randomizeTerrain(NUMROWS, NUMCOLS, map, .15);
-	//Print the map
-	printMap(NUMROWS, NUMCOLS, map);
-	//Main Search loop
+	//randomizeTerrain(NUMROWS, NUMCOLS, map, .15);  (Commented out for testing)
+	map_node* current;
+	int tent_gScore;
 	while(!open_nodes.empty()){
-
-
-
+		//Print the map and wait for user to hit enter
 		printMap(NUMROWS, NUMCOLS, map);
+		cout << endl;
 		wait();
+		//Read the lowest fScore node off the top of the queue, then pop it off
+		current=open_nodes.top();
+		current->isOpen=0;
+		current->isClosed=1;
+		open_nodes.pop();
+		//Finish if the current node is the goal
+		if((pGoal->xPos == current->xPos) && (pGoal->yPos == current->yPos)){
+			cout << "shortest path found!" << endl;
+			return 1;
+		}
+		//Iterate through all neighbors
+		for(uint i=0; i<(sizeof(current->neighbors)/sizeof(current->neighbors[1]));i++){
+			map_node* neighbor = current->neighbors[i];
+			if(neighbor==0) continue; //skip null neighbors
+			if(neighbor->isClosed) continue; //skip closed neighbors
+			if(neighbor->state == 'O') continue; //skip obstructed neighbors
+			//If the neighbor is not in the closed set calculate tentative gScore;
+			tent_gScore = current->gScore + 1; //This assumes the cost to move between neighbors is always 1
+			if(!(neighbor->isOpen) || (tent_gScore < neighbor->gScore)){
+			//If the neighbor is not in the open set, or the tentative gScore is less than the neighbors gScore
+				//??????????????????? NEED TO SEE WHERE I CAME FROM
+				neighbor->gScore = tent_gScore; //Set gScore to tentative gScore value
+				neighbor->fScore = neighbor->gScore + neighbor->xyDiffHeur(pGoal); //Set fScore based on new gScore and hueristic
+				if(!neighbor->isOpen){ //If the neighbor is not already in the open_node queue add it
+					neighbor->isOpen =1;
+					open_nodes.push(neighbor);
+				}
+			}
+		}
 	}
+	//If the program exits the while loop, there was no path to the goal
+	cout << "Failure!: There is no path to the exit" << endl;
 	return 0;
 }
 

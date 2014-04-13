@@ -8,8 +8,8 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#define NUMROWS 16
-#define NUMCOLS 140 //Make sure to change the companion #define in the next file
+#define NUMROWS 5
+#define NUMCOLS 5 //Make sure to change the companion #define in the next file
 
 #define ijc(i,j) (i*NUMCOLS+j)
 #define xyc(x,y) (y*NUMCOLS+x)
@@ -26,11 +26,13 @@ public:
 	// G = goal
 	//" "= unobstructed;
 	bool isClosed=0;
+	bool isOpen=0;
 	map_node* neighbors[4];
 	void init(int xPos, int yPos, bool isClosed);
 	void calculateGScore(map_node start); //Not yet implemented
-	void calculateFScore(map_node start, int (*Hueristic)(map_node)); //Not yet implemented
+	void calculateFScore(map_node goal, int (*Hueristic)(map_node)); //Not yet implemented
 	void initNeighbors(int rows, int cols, map_node* map);
+	int xyDiffHeur(map_node* pGoal);
 };
 
 //Class that defines the > operator for map_node so that priority_queue can sort them
@@ -49,5 +51,6 @@ map_node* initMap(int rows, int cols);
 void randomizeTerrain(int rows, int cols, map_node* map, float pObs);
 void debugNeighbors(map_node* map);
 void printMap(int rows, int cols, map_node* map);
+void wait();
 
 #endif /* NODE_H_ */
