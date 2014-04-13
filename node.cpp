@@ -54,7 +54,7 @@ map_node* initMap(int rows, int cols){
 	return map;
 }
 
-
+//Add randomly obstructed nodes to the world.
 void randomizeTerrain(int rows, int cols, map_node* map, float pObs){
 	int numObs=ceil(rows*cols*pObs+.5); //The total number of obstructed spaces
 	while(numObs>0){

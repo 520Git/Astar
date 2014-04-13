@@ -17,7 +17,7 @@
 int add(int x, int y);
 
 class map_node {
-
+private:
 public:
 	int xPos, yPos,gScore,fScore;
 	char state;
@@ -31,6 +31,18 @@ public:
 	void calculateGScore(map_node start); //Not yet implemented
 	void calculateFScore(map_node start, int (*Hueristic)(map_node)); //Not yet implemented
 	void initNeighbors(int rows, int cols, map_node* map);
+};
+
+//Class that defines the > operator for map_node so that priority_queue can sort them
+//Note: the default is that priority queue sorts greatest at the top, with the default
+//operator being < . We want least at the top so we make this operator implement > .
+class compareNode {
+private:
+public:
+	bool operator()(map_node& n1, map_node& n2){
+		if(n1.fScore  > n2.fScore) return true;
+		else return false;
+	}
 };
 
 map_node* initMap(int rows, int cols);
