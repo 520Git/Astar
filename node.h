@@ -8,9 +8,9 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#define NUMROWS 40
-#define NUMCOLS 40 //Make sure to change the companion #define in the next file
-#define NUMNEIGHBS 4
+#define NUMROWS 8
+#define NUMCOLS 8 //Make sure to change the companion #define in the next file
+#define NUMNEIGHBS 8
 
 #define ijc(i,j) (i*NUMCOLS+j)
 #define xyc(x,y) (y*NUMCOLS+x)
@@ -45,7 +45,7 @@ class compareNode {
 private:
 public:
 	bool operator()(map_node* n1, map_node* n2){
-		if(n1->fScore  > n2->fScore) return true;
+		if(n1->fScore  >= n2->fScore) return true; //Must be >= or ties result in newer node going to top, forcing you to exhaustively explore
 		else return false;
 	}
 };

@@ -50,11 +50,21 @@ void map_node::initNeighbors(int rows, int cols, map_node* map){
 float map_node::xyDiffHeur(map_node* pGoal){
 	float dist;
 	if(NUMNEIGHBS==4){
-	dist = abs(xPos-pGoal->xPos)+ abs(yPos-pGoal->yPos);
+	dist = abs(xPos-(pGoal->xPos))+ abs(yPos-(pGoal->yPos));
 	} else if(NUMNEIGHBS==8){
-	dist = sqrt((((xPos-pGoal->xPos)^2)+((yPos-pGoal->yPos)^2))/2); //This assumes diagonals have edge weight 1, so you have to correct straight line distance to be addmisible
-	}else{
-		cout<< "error! number of neighbors is not 4 or 8" << endl;
+	float xdif = abs(xPos-(pGoal->xPos));
+	float ydif = abs(yPos-(pGoal->yPos));
+	float adj = abs(xdif-ydif);
+	float square;
+	if(xdif>ydif) square = xdif-adj;
+	else square = ydif-adj;
+	dist=square+adj;
+	//first method often underestimated distance
+//	float xdif = pow((xPos-(pGoal->xPos)),2);
+//	float ydif = pow((yPos-(pGoal->yPos)),2);
+//	dist = sqrt((xdif+ydif)/2);
+//	}else{
+//		cout<< "error! number of neighbors is not 4 or 8" << endl;
 	}
 	return dist;
 };

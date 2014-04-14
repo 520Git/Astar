@@ -32,7 +32,7 @@ int main() {
 	pStart->isOpen =1;
 	open_nodes.push(pStart); //Only the start node is in the open_nodes queue at the start
 	//Add random obstructions in empty spaces
-	randomizeTerrain(NUMROWS, NUMCOLS, map, 0);
+	randomizeTerrain(NUMROWS, NUMCOLS, map, .35);
 	map_node* current;
 	int tent_gScore;
 	while(!open_nodes.empty()){
@@ -42,6 +42,7 @@ int main() {
 		//wait();
 		//Read the lowest fScore node off the top of the queue, then pop it off
 		current=open_nodes.top();
+		cout << current->fScore << endl;
 		current->isOpen=0;
 		current->isClosed=1;
 		open_nodes.pop();
@@ -52,10 +53,10 @@ int main() {
 			while(retrace->cameFrom->state != 'S'){
 				retrace = retrace->cameFrom;
 				retrace->state = 'P';
-				printMap(NUMROWS, NUMCOLS, map);
-				cout << endl;
-				//wait();
 			}
+			printMap(NUMROWS, NUMCOLS, map);
+			cout << endl;
+			//wait();
 			cout << "shortest path found! This map generated with seed: " << seed << endl;
 			return 1;
 		}
