@@ -8,15 +8,17 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#define NUMROWS 8
-#define NUMCOLS 8 //Make sure to change the companion #define in the next file
-#define NUMNEIGHBS 8
+#define NUMROWS 10
+#define NUMCOLS 10
+#define NUMNEIGHBS 4
+
+#define TIEBREAKSELECT 0
 
 #define ijc(i,j) (i*NUMCOLS+j)
 #define xyc(x,y) (y*NUMCOLS+x)
 
 #include <queue>
-using namespace std;
+using namespace std; //needed for std::priority_queue
 
 class map_node {
 private:
@@ -45,8 +47,15 @@ class compareNode {
 private:
 public:
 	bool operator()(map_node* n1, map_node* n2){
+	if(TIEBREAKSELECT==0){
+		if(n1->fScore  == n2->fScore){
+			if(n1->gScore  == n2->gScore)return false;
+			else return (n1->gScore  < n2->gScore);
+		}else return (n1->fScore  > n2->fScore);
+	}else if(TIEBREAKSELECT==1){
 		if(n1->fScore  >= n2->fScore) return true; //Must be >= or ties result in newer node going to top, forcing you to exhaustively explore
 		else return false;
+	}else return 0;
 	}
 };
 
@@ -58,5 +67,6 @@ void debugNeighbors(map_node* map);
 void printMap(int rows, int cols, map_node* map);
 void wait();
 void forceResort(openQueue open_nodes);
+map_node* deepCopyMap(int rows, int cols, map_node* map);
 
 #endif /* NODE_H_ */

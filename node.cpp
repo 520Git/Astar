@@ -69,13 +69,11 @@ float map_node::xyDiffHeur(map_node* pGoal){
 	return dist;
 };
 
-
 //Fscore is based on the nodes gscore and its estimated distance to the goal
 void map_node::calculateFScore(map_node goal, float (*Hueristic)(map_node)){
 	fScore = gScore + Hueristic(goal);
 	return;
 };
-
 
 //Function to set initial values of all nodes in the map
 map_node* initMap(int rows, int cols){
@@ -136,7 +134,6 @@ void printMap(int rows, int cols, map_node* map){
 	}
 }
 
-
 //Function I sometimes use in debugging to prompt user and wait for enter key to be pressed
 void wait()
   {
@@ -172,6 +169,30 @@ void forceResort(openQueue open_nodes){
 	open_nodes.push(temp);
 	}
 	return;
+}
+
+map_node* deepCopyMap(int rows, int cols, map_node* map){
+size_t s = sizeof(map_node)*rows*cols;
+	map_node* mapCopy = new map_node[s];
+	for(int i=0; i<rows; i++){
+		for(int j=0; j<cols; j++){
+			mapCopy[ijc(i,j)].xPos = map[ijc(i,j)].xPos;
+			mapCopy[ijc(i,j)].yPos = map[ijc(i,j)].yPos;
+			mapCopy[ijc(i,j)].gScore = map[ijc(i,j)].gScore;
+			mapCopy[ijc(i,j)].fScore = map[ijc(i,j)].fScore;
+			mapCopy[ijc(i,j)].isOpen = map[ijc(i,j)].isOpen;
+			mapCopy[ijc(i,j)].isClosed = map[ijc(i,j)].isClosed;
+			mapCopy[ijc(i,j)].state = map[ijc(i,j)].state;
+			mapCopy[ijc(i,j)].initNeighbors(rows, cols, mapCopy);
+			if(map[ijc(i,j)].cameFrom == 0) mapCopy[ijc(i,j)].cameFrom =0;
+			else{
+				int cameFromXPos = map[ijc(i,j)].cameFrom->xPos;
+				int cameFromYpos = map[ijc(i,j)].cameFrom->yPos;
+				mapCopy[ijc(i,j)].cameFrom = &mapCopy[xyc(cameFromXPos, cameFromYpos)];
+			}
+			}
+		}
+	return mapCopy;
 }
 
 
