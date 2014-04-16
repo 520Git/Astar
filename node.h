@@ -8,9 +8,9 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#define NUMROWS 10
-#define NUMCOLS 10
-#define NUMNEIGHBS 4
+#define NUMROWS 60
+#define NUMCOLS 120
+#define NUMNEIGHBS 8
 
 #define TIEBREAKSELECT 0
 
@@ -64,10 +64,11 @@ typedef std::priority_queue<map_node*,vector<map_node*>,compareNode> openQueue;
 map_node* initMap(int rows, int cols);
 void randomizeTerrain(int rows, int cols, map_node* map, float pObs);
 void debugNeighbors(map_node* map);
-void printMap(int rows, int cols, map_node* map);
+void printMap(int rows, int cols, map_node* map, map_node* robot);
 void wait();
 void forceResort(openQueue open_nodes);
 map_node* deepCopyMap(int rows, int cols, map_node* map);
-int aStar(int rows, int cols, map_node* map);
+int aStar(int rows, int cols, map_node* map, map_node*pStart, map_node* pGoal);
+int repAStar(int rows, int cols, map_node* trueMap,map_node*pStart, map_node* pGoal);
 
 #endif /* NODE_H_ */

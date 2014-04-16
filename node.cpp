@@ -107,9 +107,14 @@ void randomizeTerrain(int rows, int cols, map_node* map, float pObs){
 	return;
 }
 
-void printMap(int rows, int cols, map_node* map){
+void printMap(int rows, int cols, map_node* map, map_node* robot){
 	for(int i=0; i<rows; i++){
 			for(int j=0; j<cols; j++){
+				//Overide the normal print to place the robot if it exits
+				if(robot!=0 && robot->xPos==j && robot->yPos==i){
+					cout << 'R';
+					continue;
+				}
 				switch (map[ijc(i,j)].state){
 				case 'O':
 					cout << "\u2588";
@@ -195,37 +200,36 @@ size_t s = sizeof(map_node)*rows*cols;
 	return mapCopy;
 }
 
-int aStar(int rows, int cols, map_node* map){
+int aStar(int rows, int cols, map_node* map, map_node*pStart, map_node* pGoal){
 	openQueue open_nodes;
-	map_node *current, *pStart, *pGoal;
+	map_node *current;
 	int tent_gScore;
-	for(int i=0;i<rows*cols;i++){
-		if(map[i].state == 'S'){
-			pStart = &map[i];
-			pStart->gScore =0;
-			pStart->fScore = pStart->gScore + pStart->xyDiffHeur(pGoal);
-			pStart->isOpen =1;
-			open_nodes.push(pStart); //Only the start node is in the open_nodes queue at the start
-		}
-		if(map[i].state == 'G')pGoal=&map[i];
-	}
+	//for(int i=0;i<rows*cols;i++){
+	//	if(map[i].state == 'S'){
+	pStart->gScore =0;
+	pStart->fScore = pStart->gScore + pStart->xyDiffHeur(pGoal);
+	pStart->isOpen =1;
+	open_nodes.push(pStart);
 
 	while(!open_nodes.empty()){
 		//Print the map and wait for user to hit enter
-		printMap(rows, cols, map);
-		cout << endl;
+		//printMap(rows, cols, map,0);
+		//cout << endl;
 		//wait();
+
 		//Read the lowest fScore node off the top of the queue, then pop it off
 		current=open_nodes.top();
-		cout << "The fScore of the node being expanded is:" << current->fScore << endl;
-		cout << "The gScore of the node being expanded is:" << current->gScore << endl;
+
+		//cout << "The fScore of the node being expanded is:" << current->fScore << endl;
+		//cout << "The gScore of the node being expanded is:" << current->gScore << endl;
+
 		current->isOpen=0;
 		current->isClosed=1;
 		open_nodes.pop();
 		//Finish if the current node is the goal
 		if(current->state == 'G'){
 			//Retrace the shortest path by traveling backwards using cameFrom pointers
-			while(current->cameFrom->state != 'S'){
+			while(current->cameFrom->cameFrom != 0){
 				current = current->cameFrom;
 				current->state = 'P';
 			}
@@ -252,7 +256,110 @@ int aStar(int rows, int cols, map_node* map){
 				}
 			}
 		}
+	return 0;
 }
 
+int repAStar(int rows, int cols, map_node* trueMap,map_node*pStart, map_node* pGoal){
+	//Initialize by making copy of map
+	map_node *knownMap=deepCopyMap(NUMROWS,NUMCOLS,trueMap);
+	//Make variables to store the start and goal nodes in our copy of the map
+	map_node *knownStart, *knownGoal;
+	//Make a variable that we use to keep track of when we actually need to redo the path planning
+	//It is initialized to 1 because we want to run astar the first time through the loop
+	bool droveIntoObstruction=1;
+	//Hide vision of all of the map except the start and goal
+	for(int i=0;i<rows*cols;i++){
+		switch (trueMap[i].state){
+		case 'S':
+			knownStart = &knownMap[i];
+			break;
+		case 'G':
+			knownGoal = &knownMap[i];
+			break;
+		default:
+			//Hide everything but the start and goal;
+			knownMap[i].state = ' ';
+		}
+	}
+	//Initialize robot to start position.
+	map_node *robotNode=knownStart;
+	//Continue to run aStar and move robot until the goal is reached
+	while(robotNode->state != 'G'){
+		//Reveal vision around robot
+		for(uint i=0; i<(sizeof(robotNode->neighbors)/sizeof(robotNode->neighbors[1]));i++){
+			if(robotNode->neighbors[i]!=0) {
+				int xPos = robotNode->neighbors[i]->xPos;
+				int yPos = robotNode->neighbors[i]->yPos;
+				//Dont write over the the next link in the path when revealing terrain, we need the path to stay there so
+				//the robot will continue to try and follow it until it runs into an obstacle and calculates a new route
+				if((robotNode->neighbors[i]->state == 'P' && (robotNode->neighbors[i]->cameFrom == robotNode))){
+					//do nothing
+				}else robotNode->neighbors[i]->state = trueMap[xyc(xPos,yPos)].state;
+			}
+		}
+
+		//print the map
+		printMap(rows, cols, knownMap, robotNode);
+		cout<< endl;
+		wait();
+
+		//run Astar starting from robot
+		if(droveIntoObstruction){
+			cout<<"Calculating New Path..."<<endl;
+			if(aStar(NUMROWS,NUMCOLS,knownMap,robotNode,knownGoal)){
+				//Do nothing if Astar completes
+			}else{
+				return 0;
+			}
+		}
+		//move down optimal path until it becomes obstructed
+			//Loop through neighbors looking for the goal or path
+			for(uint i=0; i<(sizeof(robotNode->neighbors)/sizeof(robotNode->neighbors[1]));i++){
+				if(robotNode->neighbors[i]!=0) {
+					if(robotNode->neighbors[i]->state == 'P' || robotNode->neighbors[i]->state == 'G'){
+						//Move towards higher g score (go down the path to the goal)
+						if(robotNode->neighbors[i]->gScore > robotNode->gScore) {
+							int xPos = robotNode->neighbors[i]->xPos;
+							int yPos = robotNode->neighbors[i]->yPos;
+							//Go down a path only if it is truly not obstructed
+							if(trueMap[xyc(xPos,yPos)].state != 'O'){
+								robotNode = robotNode->neighbors[i];
+								droveIntoObstruction = 0;
+							}
+							else droveIntoObstruction =1;
+					}
+				}
+			}
+		}
+
+
+		//if we need to re-run astar then clear the map of all calculated states
+		if(droveIntoObstruction){
+			for(int i=0;i<rows*cols;i++){
+				knownMap[i].fScore=0;
+				knownMap[i].gScore=0;
+				knownMap[i].isClosed=0;
+				knownMap[i].isOpen=0;
+				knownMap[i].cameFrom=0;
+				//Clear all states except start goal and known obstructions.
+				switch (knownMap[i].state){
+					case 'S':
+						break;
+					case 'O':
+						break;
+					case 'G':
+						break;
+					default:
+						//Hide everything but the start and goal;
+						knownMap[i].state = ' ';
+				}
+			}
+//			cout<<"Map after being cleaned"<<endl;
+//			printMap(rows,cols,knownMap, robotNode);
+//			cout << endl;
+		}
+	}
+	return 1; //If we exit the while loop the robot made it to the goal, success!;
+}
 
 

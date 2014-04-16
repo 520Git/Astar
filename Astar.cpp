@@ -16,7 +16,7 @@ map_node *map, *map2;
 
 int main() {
 	//Make a random seed so that obstruction generation is different every time.
-	int seed = 1397595742; //time(0); //hard seed:1397595742 8x8 .25
+	int seed = time(0); //hard seed:1397595742 8x8 .25
 	srand(seed);
 	//Initialize Map
 	map = initMap(NUMROWS,NUMCOLS);
@@ -27,16 +27,19 @@ int main() {
 	map_node* pStart = &map[xyc(0,0)];
 	(*pStart).state = 'S';
 	//Add random obstructions in empty spaces
-	randomizeTerrain(NUMROWS, NUMCOLS, map, 0.25);
-	//Deep Copy the map for further tests;
-	map2=deepCopyMap(NUMROWS,NUMCOLS,map);
+	randomizeTerrain(NUMROWS, NUMCOLS, map, 0.45);
 
-	//Run Astar
-	if(aStar(NUMROWS,NUMCOLS,map)){
-		printMap(NUMROWS, NUMCOLS, map);
+	//Debugging code
+	cout<< "The true map" <<endl;
+	printMap(NUMROWS,NUMCOLS,map,0);
+	cout<< endl;
+
+	//Run Astarr
+	if(repAStar(NUMROWS,NUMCOLS,map,pStart,pGoal)){
+		printMap(NUMROWS, NUMCOLS, map,0);
 		cout << "Success:Shortest path found! Terrain generated with seed:" << seed << endl;
 	}else{
-		printMap(NUMROWS, NUMCOLS, map);
+		printMap(NUMROWS, NUMCOLS, map,0);
 		cout << "Failure: No path to goal! Terrain generated with seed:" << seed << endl;
 	}
 	return 0;
