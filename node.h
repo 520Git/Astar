@@ -68,5 +68,6 @@ void printMap(int rows, int cols, map_node* map);
 void wait();
 void forceResort(openQueue open_nodes);
 map_node* deepCopyMap(int rows, int cols, map_node* map);
+int aStar(int rows, int cols, map_node* map);
 
 #endif /* NODE_H_ */

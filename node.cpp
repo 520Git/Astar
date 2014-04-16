@@ -195,5 +195,64 @@ size_t s = sizeof(map_node)*rows*cols;
 	return mapCopy;
 }
 
+int aStar(int rows, int cols, map_node* map){
+	openQueue open_nodes;
+	map_node *current, *pStart, *pGoal;
+	int tent_gScore;
+	for(int i=0;i<rows*cols;i++){
+		if(map[i].state == 'S'){
+			pStart = &map[i];
+			pStart->gScore =0;
+			pStart->fScore = pStart->gScore + pStart->xyDiffHeur(pGoal);
+			pStart->isOpen =1;
+			open_nodes.push(pStart); //Only the start node is in the open_nodes queue at the start
+		}
+		if(map[i].state == 'G')pGoal=&map[i];
+	}
+
+	while(!open_nodes.empty()){
+		//Print the map and wait for user to hit enter
+		printMap(rows, cols, map);
+		cout << endl;
+		//wait();
+		//Read the lowest fScore node off the top of the queue, then pop it off
+		current=open_nodes.top();
+		cout << "The fScore of the node being expanded is:" << current->fScore << endl;
+		cout << "The gScore of the node being expanded is:" << current->gScore << endl;
+		current->isOpen=0;
+		current->isClosed=1;
+		open_nodes.pop();
+		//Finish if the current node is the goal
+		if(current->state == 'G'){
+			//Retrace the shortest path by traveling backwards using cameFrom pointers
+			while(current->cameFrom->state != 'S'){
+				current = current->cameFrom;
+				current->state = 'P';
+			}
+			return 1;
+		}
+		//Iterate through all neighbors
+		for(uint i=0; i<(sizeof(current->neighbors)/sizeof(current->neighbors[1]));i++){
+			map_node* neighbor = current->neighbors[i];
+			if(neighbor==0) continue; //skip null neighbors
+			if(neighbor->isClosed) continue; //skip closed neighbors
+			if(neighbor->state == 'O') continue; //skip obstructed neighbors
+			//If the neighbor is not in the closed set calculate tentative gScore;
+			tent_gScore = current->gScore + 1; //This assumes the cost to move between neighbors is always 1
+			if(!(neighbor->isOpen) || (tent_gScore < neighbor->gScore)){
+			//If the neighbor is not in the open set, or the tentative gScore is less than the neighbors gScore
+				neighbor->cameFrom = current; //Make a linked list to retrace optimal path upon completion
+				neighbor->gScore = tent_gScore; //Set gScore to tentative gScore value
+				neighbor->fScore = neighbor->gScore + neighbor->xyDiffHeur(pGoal); //Set fScore based on new gScore and hueristic
+				forceResort(open_nodes); //Resort just in case neighbor was already in the queue and the new lower fScore would put it on top
+					if(!neighbor->isOpen){ //If the neighbor is not already in the open_node queue add it
+						neighbor->isOpen =1;
+						open_nodes.push(neighbor);
+					}
+				}
+			}
+		}
+}
+
 
 
